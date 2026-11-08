@@ -1,0 +1,2125 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>GLOBAL QUEST - Sejarah Tingkatan 5 Bab 10</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Fredoka & Nunito for 3D Cartoon Aesthetic -->
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <style>
+        :root {
+            --font-title: 'Fredoka', sans-serif;
+            --font-body: 'Nunito', sans-serif;
+        }
+        body {
+            font-family: var(--font-body);
+            overflow: hidden;
+            user-select: none;
+            background-color: #0f172a;
+        }
+        .font-cartoon {
+            font-family: var(--font-title);
+            letter-spacing: 0.5px;
+        }
+        /* 3D Cartoon Button & Card Styles */
+        .btn-3d {
+            transition: all 0.12s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 3px solid #1e293b;
+            box-shadow: 0 6px 0 #1e293b, 0 10px 15px rgba(0,0,0,0.35);
+            position: relative;
+        }
+        .btn-3d:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 0 #1e293b, 0 14px 20px rgba(0,0,0,0.4);
+        }
+        .btn-3d:active:not(:disabled) {
+            transform: translateY(5px);
+            box-shadow: 0 1px 0 #1e293b, 0 4px 6px rgba(0,0,0,0.3);
+        }
+        .card-3d {
+            border: 4px solid #1e293b;
+            box-shadow: 0 10px 0 #1e293b, 0 20px 30px rgba(0,0,0,0.5);
+        }
+        .text-stroke {
+            -webkit-text-stroke: 2px #0f172a;
+            text-shadow: 0 4px 0 #0f172a;
+        }
+        .text-stroke-sm {
+            -webkit-text-stroke: 1.2px #0f172a;
+            text-shadow: 0 2px 0 #0f172a;
+        }
+        /* Mirror Video Styling */
+        .mirror-video {
+            transform: scaleX(-1);
+        }
+        /* Floating Animation */
+        @keyframes floatSlow {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-10px) rotate(1.5deg); }
+        }
+        .animate-float {
+            animation: floatSlow 3.5s ease-in-out infinite;
+        }
+        /* Custom Scrollbar for Explanation/Review */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #1e293b;
+            border-radius: 8px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #f59e0b;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body class="relative w-screen h-screen overflow-hidden bg-slate-950 text-white">
+
+    <!-- LAYER 0: Fullscreen Webcam Video Background -->
+    <video id="webcamVideo" autoplay playsinline muted class="fixed inset-0 w-full h-full object-cover z-0 mirror-video opacity-0 transition-opacity duration-700"></video>
+
+    <!-- Fallback Animated 3D-Style Background when Camera is Off or Tinted Overlay -->
+    <div id="arenaBackdrop" class="fixed inset-0 z-0 bg-gradient-to-b from-indigo-950/85 via-slate-900/75 to-emerald-950/85 pointer-events-none transition-all duration-500">
+        <!-- Decorative Cartoon Clouds & Grid -->
+        <div class="absolute inset-0 opacity-20" style="background-image: radial-gradient(#38bdf8 1.5px, transparent 1.5px); background-size: 32px 32px;"></div>
+    </div>
+
+    <!-- LAYER 1: Interactive 2D/3D-Cartoon Game Canvas (Transparent Background) -->
+    <canvas id="gameCanvas" class="fixed inset-0 w-full h-full z-10 pointer-events-auto"></canvas>
+
+    <!-- LAYER 2: Top HUD Bar (Visible During Gameplay) -->
+    <header id="hudBar" class="hidden fixed top-0 left-0 right-0 z-20 p-2 sm:p-4 pointer-events-none flex flex-wrap items-center justify-between gap-2">
+        <!-- Left: Player Lives, Score & Streak -->
+        <div class="flex items-center gap-2 sm:gap-3 pointer-events-auto">
+            <div class="card-3d bg-slate-900/95 px-3 py-1.5 sm:px-4 sm:py-2 rounded-2xl flex items-center gap-2">
+                <div id="livesDisplay" class="flex items-center gap-1 text-lg sm:text-2xl text-rose-500">
+                    <i class="fa-solid fa-heart"></i>
+                    <i class="fa-solid fa-heart"></i>
+                    <i class="fa-solid fa-heart"></i>
+                    <i class="fa-solid fa-heart"></i>
+                    <i class="fa-solid fa-heart"></i>
+                </div>
+            </div>
+
+            <div class="card-3d bg-amber-400 text-slate-900 px-3 py-1.5 sm:px-4 sm:py-2 rounded-2xl flex items-center gap-2 font-cartoon">
+                <i class="fa-solid fa-star text-amber-700 text-lg sm:text-xl"></i>
+                <div>
+                    <div class="text-[10px] uppercase font-bold leading-none text-amber-900">Skor</div>
+                    <div id="scoreDisplay" class="text-base sm:text-xl font-black leading-none">0</div>
+                </div>
+            </div>
+
+            <div id="comboBadge" class="hidden card-3d bg-fuchsia-500 text-white px-3 py-1.5 rounded-2xl font-cartoon text-sm sm:text-base animate-bounce">
+                🔥 KOMBO x<span id="comboCount">2</span>
+            </div>
+        </div>
+
+        <!-- Center: Tracking Status & Active Finger Count Badge -->
+        <div class="flex items-center gap-2 pointer-events-auto">
+            <div id="trackingBadge" class="card-3d bg-slate-900/95 px-3 py-1.5 sm:px-4 sm:py-2 rounded-2xl flex items-center gap-2 text-xs sm:text-sm font-bold">
+                <span id="trackingDot" class="w-3 h-3 rounded-full bg-amber-400 animate-ping"></span>
+                <span id="trackingText">Memuatkan Kamera...</span>
+                <span id="fingerCountPill" class="ml-1 px-2 py-0.5 rounded-lg bg-indigo-600 text-white font-cartoon text-xs sm:text-sm">Jari: 0</span>
+            </div>
+        </div>
+
+        <!-- Right: Controls (Mirror, Audio, Pause) -->
+        <div class="flex items-center gap-2 pointer-events-auto">
+            <button id="btnToggleMirror" title="Tukar Mod Cermin" class="btn-3d bg-cyan-500 hover:bg-cyan-400 text-slate-950 w-10 h-10 sm:w-11 sm:h-11 rounded-xl flex items-center justify-center font-bold text-base sm:text-lg">
+                <i class="fa-solid fa-left-right"></i>
+            </button>
+            <button id="btnToggleAudio" title="Bunyi & Muzik" class="btn-3d bg-emerald-400 hover:bg-emerald-300 text-slate-950 w-10 h-10 sm:w-11 sm:h-11 rounded-xl flex items-center justify-center font-bold text-base sm:text-lg">
+                <i id="audioIcon" class="fa-solid fa-volume-high"></i>
+            </button>
+            <button id="btnPauseGame" title="Jeda Permainan" class="btn-3d bg-amber-400 hover:bg-amber-300 text-slate-950 w-10 h-10 sm:w-11 sm:h-11 rounded-xl flex items-center justify-center font-bold text-base sm:text-lg">
+                <i class="fa-solid fa-pause"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- LAYER 3: SCREENS & MODALS -->
+
+    <!-- 1. MAIN MENU SCREEN -->
+    <section id="menuScreen" class="fixed inset-0 z-30 flex items-center justify-center p-4 overflow-y-auto">
+        <div class="card-3d bg-gradient-to-b from-indigo-900 via-slate-900 to-slate-950 max-w-3xl w-full rounded-3xl p-6 sm:p-8 text-center relative overflow-hidden my-auto">
+            <!-- Top Badge -->
+            <div class="inline-flex items-center gap-2 bg-amber-400 text-slate-950 px-4 py-1.5 rounded-full font-cartoon font-bold text-xs sm:text-sm border-2 border-slate-950 shadow mb-3">
+                <i class="fa-solid fa-earth-asia"></i> SEJARAH TINGKATAN 5 • KSSM SPM • BAB 10
+            </div>
+
+            <!-- Main Game Title -->
+            <h1 class="font-cartoon text-4xl sm:text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-yellow-400 to-orange-400 text-stroke mb-2 tracking-wide">
+                GLOBAL QUEST
+            </h1>
+            <p class="text-cyan-300 font-cartoon text-lg sm:text-2xl mb-4">
+                ⚔️ Pertempuran Bos AR: Kecemerlangan Malaysia di Persada Dunia ⚔️
+            </p>
+
+            <!-- Hero Bosses Preview Banner -->
+            <div class="grid grid-cols-5 gap-2 bg-slate-800/80 border-2 border-slate-700 rounded-2xl p-3 mb-5">
+                <div class="flex flex-col items-center p-1">
+                    <span class="text-2xl sm:text-4xl animate-float">🏴‍☠️</span>
+                    <span class="text-[10px] sm:text-xs font-bold text-amber-300 mt-1">10.1 Isu Global</span>
+                </div>
+                <div class="flex flex-col items-center p-1">
+                    <span class="text-2xl sm:text-4xl animate-float" style="animation-delay:0.3s">🤖</span>
+                    <span class="text-[10px] sm:text-xs font-bold text-cyan-300 mt-1">10.2 Ekonomi</span>
+                </div>
+                <div class="flex flex-col items-center p-1">
+                    <span class="text-2xl sm:text-4xl animate-float" style="animation-delay:0.6s">👾</span>
+                    <span class="text-[10px] sm:text-xs font-bold text-rose-300 mt-1">10.3 Kemanusiaan</span>
+                </div>
+                <div class="flex flex-col items-center p-1">
+                    <span class="text-2xl sm:text-4xl animate-float" style="animation-delay:0.9s">🦖</span>
+                    <span class="text-[10px] sm:text-xs font-bold text-emerald-300 mt-1">10.4 Kelestarian</span>
+                </div>
+                <div class="flex flex-col items-center p-1">
+                    <span class="text-2xl sm:text-4xl animate-float" style="animation-delay:1.2s">🛸</span>
+                    <span class="text-[10px] sm:text-xs font-bold text-purple-300 mt-1">10.5 Masa Hadapan</span>
+                </div>
+            </div>
+
+            <!-- Control Modes Explanation -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-left mb-6">
+                <div class="bg-slate-800/90 border-2 border-indigo-500/50 rounded-2xl p-3 flex items-start gap-3">
+                    <div class="bg-indigo-500 text-white w-10 h-10 rounded-xl flex items-center justify-center shrink-0 font-cartoon text-lg">✋</div>
+                    <div>
+                        <h3 class="font-cartoon text-amber-300 text-sm">Kiraan Jari (1 - 4)</h3>
+                        <p class="text-xs text-slate-300">Angkat <strong>1, 2, 3, atau 4 jari lurus</strong> selama 1 saat untuk menembak Perisai Jawapan A, B, C, atau D!</p>
+                    </div>
+                </div>
+                <div class="bg-slate-800/90 border-2 border-cyan-500/50 rounded-2xl p-3 flex items-start gap-3">
+                    <div class="bg-cyan-500 text-slate-950 w-10 h-10 rounded-xl flex items-center justify-center shrink-0 font-cartoon text-lg">👆</div>
+                    <div>
+                        <h3 class="font-cartoon text-cyan-300 text-sm">Sentuhan AR / Cubit</h3>
+                        <p class="text-xs text-slate-300">Halakan <strong>kursor jari telunjuk</strong> ke atas sasaran jawapan (Dwell 1s) atau cubit ibu jari & telunjuk.</p>
+                    </div>
+                </div>
+                <div class="bg-slate-800/90 border-2 border-emerald-500/50 rounded-2xl p-3 flex items-start gap-3">
+                    <div class="bg-emerald-500 text-slate-950 w-10 h-10 rounded-xl flex items-center justify-center shrink-0 font-cartoon text-lg">⌨️</div>
+                    <div>
+                        <h3 class="font-cartoon text-emerald-300 text-sm">Sokongan Tetikus/Kekunci</h3>
+                        <p class="text-xs text-slate-300">Klik terus pada sasaran atau tekan kekunci <strong>1, 2, 3, 4 / A, B, C, D</strong> bila-bila masa.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+                <button id="btnStartWithCamera" class="btn-3d w-full sm:w-auto bg-gradient-to-r from-emerald-400 to-green-500 hover:from-emerald-300 hover:to-green-400 text-slate-950 font-cartoon text-xl px-8 py-4 rounded-2xl flex items-center justify-center gap-3">
+                    <i class="fa-solid fa-camera text-2xl"></i> MULA PERMAINAN (AR KAMERA)
+                </button>
+                <button id="btnStartWithoutCamera" class="btn-3d w-full sm:w-auto bg-slate-700 hover:bg-slate-600 text-white font-cartoon text-base px-6 py-4 rounded-2xl flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-computer-mouse"></i> Mod Tanpa Kamera
+                </button>
+            </div>
+
+            <p class="text-[11px] text-slate-400 mt-4 flex items-center justify-center gap-1.5">
+                <i class="fa-solid fa-shield-halved text-emerald-400"></i> Privasi Terjamin: Pemprosesan kamera 100% di pelayar anda. Tiada rakaman disimpan.
+            </p>
+        </div>
+    </section>
+
+    <!-- 2. TUTORIAL & CALIBRATION MODAL -->
+    <section id="calibrationScreen" class="hidden fixed inset-0 z-30 flex items-center justify-center p-4 pointer-events-none">
+        <div class="card-3d bg-slate-900/90 backdrop-blur-md max-w-xl w-full rounded-3xl p-6 text-center pointer-events-auto border-4 border-amber-400">
+            <div class="inline-block bg-indigo-600 text-white text-xs font-cartoon px-3 py-1 rounded-full mb-2">
+                UJIAN PENENTUKURAN TANGAN AR
+            </div>
+            <h2 class="font-cartoon text-2xl sm:text-3xl text-amber-300 mb-2">Cuba Angkat Jari Anda!</h2>
+            <p class="text-xs sm:text-sm text-slate-300 mb-4">
+                Pastikan tangan anda kelihatan di dalam skrin kamera. Angkat <strong>1 hingga 4 jari lurus</strong> atau gerakkan kursor jari telunjuk anda.
+            </p>
+
+            <!-- Live Finger Calibration Meter -->
+            <div class="grid grid-cols-4 gap-2.5 mb-5">
+                <div id="calBox1" class="border-3 border-slate-700 bg-slate-800/90 rounded-2xl p-3 transition-all">
+                    <div class="text-2xl font-cartoon text-rose-400">1 Jari</div>
+                    <div class="text-xs font-bold text-slate-300">Pilihan A</div>
+                </div>
+                <div id="calBox2" class="border-3 border-slate-700 bg-slate-800/90 rounded-2xl p-3 transition-all">
+                    <div class="text-2xl font-cartoon text-amber-400">2 Jari</div>
+                    <div class="text-xs font-bold text-slate-300">Pilihan B</div>
+                </div>
+                <div id="calBox3" class="border-3 border-slate-700 bg-slate-800/90 rounded-2xl p-3 transition-all">
+                    <div class="text-2xl font-cartoon text-emerald-400">3 Jari</div>
+                    <div class="text-xs font-bold text-slate-300">Pilihan C</div>
+                </div>
+                <div id="calBox4" class="border-3 border-slate-700 bg-slate-800/90 rounded-2xl p-3 transition-all">
+                    <div class="text-2xl font-cartoon text-cyan-400">4 Jari</div>
+                    <div class="text-xs font-bold text-slate-300">Pilihan D</div>
+                </div>
+            </div>
+
+            <div class="bg-slate-800/90 rounded-2xl p-3 mb-5 flex items-center justify-between text-xs sm:text-sm">
+                <span class="text-slate-300"><i class="fa-solid fa-hand-sparkles text-amber-400 mr-1"></i> Status Pengesanan:</span>
+                <span id="calStatusText" class="font-cartoon text-emerald-400">Menunggu Tangan...</span>
+            </div>
+
+            <button id="btnLaunchBattle" class="btn-3d w-full bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-300 hover:to-orange-400 text-slate-950 font-cartoon text-xl py-3.5 rounded-2xl">
+                ⚔️ GEMPUR BOS SEKARANG!
+            </button>
+        </div>
+    </section>
+
+    <!-- 3. PAUSE OVERLAY -->
+    <section id="pauseScreen" class="hidden fixed inset-0 z-30 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="card-3d bg-slate-900 max-w-md w-full rounded-3xl p-6 text-center">
+            <h2 class="font-cartoon text-3xl text-amber-400 mb-2">PERMAINAN DIJEDA</h2>
+            <p class="text-sm text-slate-300 mb-6">Berehat sebentar, Wira Sejarah Malaysia!</p>
+            <div class="flex flex-col gap-3">
+                <button id="btnResumeGame" class="btn-3d bg-emerald-400 hover:bg-emerald-300 text-slate-950 font-cartoon text-lg py-3 rounded-2xl">
+                    <i class="fa-solid fa-play mr-2"></i> Sambung Permainan
+                </button>
+                <button id="btnRestartFromPause" class="btn-3d bg-amber-400 hover:bg-amber-300 text-slate-950 font-cartoon text-lg py-3 rounded-2xl">
+                    <i class="fa-solid fa-rotate-right mr-2"></i> Mula Semula (Soalan 1)
+                </button>
+                <button id="btnBackToMenu" class="btn-3d bg-slate-700 hover:bg-slate-600 text-white font-cartoon text-base py-3 rounded-2xl">
+                    <i class="fa-solid fa-house mr-2"></i> Menu Utama
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- 4. END / RESULTS SCREEN -->
+    <section id="gameOverScreen" class="hidden fixed inset-0 z-30 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
+        <div class="card-3d bg-slate-900 max-w-2xl w-full rounded-3xl p-6 sm:p-8 text-center my-auto">
+            <div id="endEmoji" class="text-6xl mb-2">🏆</div>
+            <h2 id="endTitle" class="font-cartoon text-3xl sm:text-4xl text-amber-400 mb-1">MISI SELESAI!</h2>
+            <p id="endSubtitle" class="text-sm sm:text-base text-slate-300 mb-5">Tahniah kerana mempertahankan kecemerlangan Malaysia di persada dunia!</p>
+
+            <div class="grid grid-cols-3 gap-3 mb-6">
+                <div class="bg-slate-800 border-2 border-slate-700 rounded-2xl p-3">
+                    <div class="text-xs text-slate-400 uppercase font-bold">Skor Akhir</div>
+                    <div id="finalScore" class="font-cartoon text-2xl sm:text-3xl text-amber-400">0</div>
+                </div>
+                <div class="bg-slate-800 border-2 border-slate-700 rounded-2xl p-3">
+                    <div class="text-xs text-slate-400 uppercase font-bold">Ketepatan</div>
+                    <div id="finalAccuracy" class="font-cartoon text-2xl sm:text-3xl text-emerald-400">0%</div>
+                </div>
+                <div class="bg-slate-800 border-2 border-slate-700 rounded-2xl p-3">
+                    <div class="text-xs text-slate-400 uppercase font-bold">Bos Tewas</div>
+                    <div id="finalBosses" class="font-cartoon text-2xl sm:text-3xl text-cyan-400">0 / 5</div>
+                </div>
+            </div>
+
+            <div class="flex flex-col sm:flex-row gap-3 justify-center">
+                <button id="btnContinueEndless" class="btn-3d bg-gradient-to-r from-fuchsia-500 to-indigo-600 hover:from-fuchsia-400 hover:to-indigo-500 text-white font-cartoon text-lg px-6 py-3.5 rounded-2xl">
+                    <i class="fa-solid fa-infinity mr-2"></i> Sambung Mod Tanpa Henti (Endless)
+                </button>
+                <button id="btnPlayAgain" class="btn-3d bg-emerald-400 hover:bg-emerald-300 text-slate-950 font-cartoon text-lg px-6 py-3.5 rounded-2xl">
+                    <i class="fa-solid fa-rotate-right mr-2"></i> Main Semula
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        /********************************************************************
+         * 1. COMPLETE ACADEMIC QUESTION DATABASE (30 QUESTIONS - BAB 10)
+         ********************************************************************/
+        const QUESTIONS_DB = [
+            // SUBTOPIK 10.1: Malaysia dalam Isu Global Kontemporari
+            {
+                id: 1,
+                subtopic: "10.1 Malaysia dalam Isu Global Kontemporari",
+                bossIndex: 0,
+                q: "Persidangan antarabangsa manakah yang disertai oleh Malaysia sejak tahun 1983 bagi membanteras ancaman pengedaran dadah di peringkat antarabangsa?",
+                options: [
+                    "International Drug Enforcement Conference (IDEC)",
+                    "International Criminal Police Organization (INTERPOL)",
+                    "United Nations International Drug Control Programme (UNDCP)",
+                    "Asia-Pacific Economic Cooperation (APEC)"
+                ],
+                correct: 0,
+                explanation: "Malaysia menyertai IDEC sejak 1983 untuk bekerjasama membanteras penyalahgunaan dan pengedaran dadah."
+            },
+            {
+                id: 2,
+                subtopic: "10.1 Malaysia dalam Isu Global Kontemporari",
+                bossIndex: 0,
+                q: "Mengapakah Kepulauan Spratly menjadi asas perebutan dan tuntutan bertindih antara China, Vietnam, Brunei, Filipina, dan Malaysia?",
+                options: [
+                    "Kawasan pusat perlombongan emas utama Asia Tenggara",
+                    "Kedudukan geostrategik laluan perdagangan & kaya sumber semula jadi",
+                    "Tempat perlindungan pelarian perang antarabangsa",
+                    "Kawasan ujian senjata nuklear kuasa-kuasa besar"
+                ],
+                correct: 1,
+                explanation: "Kepulauan Spratly menjadi rebutan kerana faktor geostrategik laluan pelayaran serta potensi sumber petroleum dan gas asli."
+            },
+            {
+                id: 3,
+                subtopic: "10.1 Malaysia dalam Isu Global Kontemporari",
+                bossIndex: 0,
+                q: "Berdasarkan Akta Zon Ekonomi Eksklusif 1984, manakah wilayah pulau atau terumbu yang dimasukkan ke dalam wilayah Malaysia dalam isu Kepulauan Spratly?",
+                options: [
+                    "Pulau Batu Puteh",
+                    "Terumbu Layang-Layang",
+                    "Pulau Sipadan",
+                    "Terumbu Karang Paracel"
+                ],
+                correct: 1,
+                explanation: "Terumbu Layang-Layang, Terumbu Ubi, Terumbu Semarang Barat, dan Pulau Kecil Amboyna dimasukkan dalam peta wilayah Malaysia 1979 / Akta ZEE 1984."
+            },
+            {
+                id: 4,
+                subtopic: "10.1 Malaysia dalam Isu Global Kontemporari",
+                bossIndex: 0,
+                q: "Bagaimanakah Malaysia bersama negara pengeluar minyak sawit menangani kempen antiminyak sawit oleh negara-negara Barat?",
+                options: [
+                    "Menghentikan eksport minyak sawit secara total ke Eropah",
+                    "Menganggotai RSPO dan melancarkan Kempen Sayangi Sawitku",
+                    "Menurunkan harga pasaran minyak sawit ke paras minimum",
+                    "Menggantikan tanaman kelapa sawit dengan tanaman getah"
+                ],
+                correct: 1,
+                explanation: "Malaysia menganggotai Roundtable on Sustainable Palm Oil (RSPO) dan melancarkan Kempen Sayangi Sawitku bagi membalas prasangka antiminyak sawit Barat."
+            },
+            {
+                id: 5,
+                subtopic: "10.1 Malaysia dalam Isu Global Kontemporari",
+                bossIndex: 0,
+                q: "Pada tahun 2018, Pertubuhan Kesihatan Sedunia (WHO) memperakui kejayaan Malaysia berhubung isu penyakit berjangkit AIDS. Apakah pencapaian tersebut?",
+                options: [
+                    "Berjaya menamatkan wabak AIDS sepenuhnya di seluruh rantau Asia",
+                    "Berjaya mengurangkan penularan wabak HIV/AIDS daripada ibu kepada anak",
+                    "Menjadi negara pertama menghasilkan vaksin pencegahan AIDS",
+                    "Menghentikan kemasukan pesakit luar negara secara mutlak"
+                ],
+                correct: 1,
+                explanation: "Pada 2018, WHO memperakui kejayaan Malaysia mengurangkan penularan HIV/AIDS daripada ibu kepada anak."
+            },
+            {
+                id: 6,
+                subtopic: "10.1 Malaysia dalam Isu Global Kontemporari",
+                bossIndex: 0,
+                q: "Bilakah Hari AIDS Sedunia disambut oleh Malaysia dan masyarakat antarabangsa setiap tahun bagi meningkatkan kesedaran penyakit ini?",
+                options: [
+                    "1 Disember",
+                    "31 Ogos",
+                    "24 Mac",
+                    "16 Jun"
+                ],
+                correct: 0,
+                explanation: "Hari AIDS Sedunia disambut pada 1 Disember setiap tahun."
+            },
+
+            // SUBTOPIK 10.2: Peranan Malaysia dalam Hubungan Ekonomi Antarabangsa
+            {
+                id: 7,
+                subtopic: "10.2 Peranan Malaysia dalam Hubungan Ekonomi Antarabangsa",
+                bossIndex: 1,
+                q: "Apakah tujuan utama pembentukan Kawasan Perdagangan Bebas ASEAN (AFTA) yang disertai oleh Malaysia pada tahun 1992?",
+                options: [
+                    "Mengurangkan tarif/cukai barangan ASEAN & menjadikan ASEAN lokasi produksi kompetitif",
+                    "Menghapuskan penggunaan mata wang tempatan di Asia Tenggara",
+                    "Mengenakan sekatan perdagangan ketat terhadap barangan dari Eropah",
+                    "Membentuk pakatan ketenteraan bersama untuk mengawal pasaran"
+                ],
+                correct: 0,
+                explanation: "AFTA dibentuk pada 1992 untuk mengurangkan tarif cukai dan menggalakkan perdagangan serantau yang kompetitif."
+            },
+            {
+                id: 8,
+                subtopic: "10.2 Peranan Malaysia dalam Hubungan Ekonomi Antarabangsa",
+                bossIndex: 1,
+                q: "Apakah bentuk kerjasama pembangunan ekonomi segi tiga yang melibatkan wilayah Singapura, Johor, dan Riau?",
+                options: [
+                    "IMT-GT",
+                    "BIMP-EAGA",
+                    "SIJORI-GT",
+                    "APEC"
+                ],
+                correct: 2,
+                explanation: "SIJORI-GT merupakan kerjasama pembangunan ekonomi segi tiga Singapura-Johor-Riau."
+            },
+            {
+                id: 9,
+                subtopic: "10.2 Peranan Malaysia dalam Hubungan Ekonomi Antarabangsa",
+                bossIndex: 1,
+                q: "Bagaimanakah Malaysia menangani krisis kemelesetan ekonomi Asia 1997–1998 tanpa menggunakan pinjaman Tabung Kewangan Antarabangsa (IMF)?",
+                options: [
+                    "Menjual rizab emas negara kepada pelabur asing",
+                    "Menambat kadar pertukaran Ringgit Malaysia pada kadar RM3.80 bagi USD1",
+                    "Meminjam dana kewangan daripada Bank Dunia",
+                    "Menghentikan sebarang aktiviti import dan eksport barangan"
+                ],
+                correct: 1,
+                explanation: "Malaysia enggan menerima pelan IMF dan bertindak menambat kadar pertukaran Ringgit pada RM3.80 = USD1."
+            },
+            {
+                id: 10,
+                subtopic: "10.2 Peranan Malaysia dalam Hubungan Ekonomi Antarabangsa",
+                bossIndex: 1,
+                q: "Apakah tujuan penubuhan International Centre for Education in Islamic Finance (INCEIF) oleh kerajaan Malaysia?",
+                options: [
+                    "Membangunkan pasaran saham konvensional serantau",
+                    "Menyokong perkembangan dan mengantarabangsakan sistem kewangan Islam",
+                    "Menyediakan kemudahan kredit mikro kepada perniagaan kecil tempatan",
+                    "Menguruskan agihan zakat bagi negara-negara anggota OIC"
+                ],
+                correct: 1,
+                explanation: "INCEIF ditubuhkan bagi memajukan dan mengantarabangsakan pendidikan serta sistem kewangan Islam."
+            },
+            {
+                id: 11,
+                subtopic: "10.2 Peranan Malaysia dalam Hubungan Ekonomi Antarabangsa",
+                bossIndex: 1,
+                q: "Mengapakah Malaysia mendesak agar negara-negara maju memberikan layanan yang saksama dalam perdagangan antarabangsa?",
+                options: [
+                    "Kerana negara maju mengenakan sekatan tarif & bukan tarif terhadap barangan negara berkembang",
+                    "Kerana negara maju enggan menjual barangan teknologi tinggi",
+                    "Kerana Malaysia ingin memonopoli pasaran perdagangan Eropah",
+                    "Kerana negara maju tidak mahu menerima mata wang Dolar"
+                ],
+                correct: 0,
+                explanation: "Malaysia bersuara menentang sekatan dan penindasan tarif serta bukan tarif oleh negara maju terhadap produk negara sedang membangun."
+            },
+            {
+                id: 12,
+                subtopic: "10.2 Peranan Malaysia dalam Hubungan Ekonomi Antarabangsa",
+                bossIndex: 1,
+                q: "Apakah negara yang terlibat dalam kerjasama pembangunan ekonomi segi tiga IMT-GT?",
+                options: [
+                    "Indonesia – Malaysia – Thailand",
+                    "Indonesia – Malaysia – Timor Leste",
+                    "India – Malaysia – Taiwan",
+                    "Iran – Malaysia – Turki"
+                ],
+                correct: 0,
+                explanation: "IMT-GT merujuk kepada Indonesia–Malaysia–Thailand Growth Triangle."
+            },
+
+            // SUBTOPIK 10.3: Pelibatan Rakyat dalam Isu Kemanusiaan dan Keamanan
+            {
+                id: 13,
+                subtopic: "10.3 Pelibatan Rakyat dalam Isu Kemanusiaan dan Keamanan",
+                bossIndex: 2,
+                q: "NGO tempatan manakah yang ditubuhkan oleh Tan Sri Dr. Jemilah Mahmood bagi menyalurkan bantuan perubatan kecemasan di Aceh dan Sri Lanka?",
+                options: [
+                    "Aman Palestin",
+                    "MERCY Malaysia",
+                    "Cinta Gaza Malaysia",
+                    "Global Peace Mission"
+                ],
+                correct: 1,
+                explanation: "MERCY Malaysia memberikan bantuan perubatan kecemasan dan pembinaan semula di kawasan bencana seperti Aceh dan Sri Lanka."
+            },
+            {
+                id: 14,
+                subtopic: "10.3 Pelibatan Rakyat dalam Isu Kemanusiaan dan Keamanan",
+                bossIndex: 2,
+                q: "Siapakah pengasas pertubuhan Cinta Gaza Malaysia (CGM) yang mula beroperasi pada tahun 2013 bagi menyalurkan bantuan kepada penduduk Gaza?",
+                options: [
+                    "Dr. Mohd Afandi Salleh",
+                    "Muhammad Nadir Al-Nuri Kamarulzaman",
+                    "Dr. Fauziah Mohd Hasan",
+                    "Tun Dr. Mahathir Mohamad"
+                ],
+                correct: 1,
+                explanation: "Cinta Gaza Malaysia (CGM) diasaskan oleh Muhammad Nadir Al-Nuri Kamarulzaman pada tahun 2013."
+            },
+            {
+                id: 15,
+                subtopic: "10.3 Pelibatan Rakyat dalam Isu Kemanusiaan dan Keamanan",
+                bossIndex: 2,
+                q: "Apakah nama program kemanusiaan antarabangsa anjuran Free Gaza Movement yang disertai sukarelawan Malaysia untuk menyalurkan bantuan ke Palestin?",
+                options: [
+                    "Women's Boat to Gaza",
+                    "Freedom Flotilla",
+                    "i4Syria",
+                    "Project Ramadan"
+                ],
+                correct: 1,
+                explanation: "Program Freedom Flotilla digerakkan oleh Free Gaza Movement bagi menembusi sekatan untuk membantu rakyat Palestin."
+            },
+            {
+                id: 16,
+                subtopic: "10.3 Pelibatan Rakyat dalam Isu Kemanusiaan dan Keamanan",
+                bossIndex: 2,
+                q: "Pada tahun 2016, tokoh perubatan wanita Malaysia, Dr. Fauziah Mohd Hasan telah menyertai misi kemanusiaan ke Palestin menerusi kapal apakah?",
+                options: [
+                    "Mavi Marmara",
+                    "Al-Awda",
+                    "Zaytouna-Oliva (Women's Boat to Gaza)",
+                    "Kapal Rachel Corrie"
+                ],
+                correct: 2,
+                explanation: "Dr. Fauziah Mohd Hasan menyertai misi Women's Boat to Gaza menaiki kapal Zaytouna-Oliva pada tahun 2016."
+            },
+            {
+                id: 17,
+                subtopic: "10.3 Pelibatan Rakyat dalam Isu Kemanusiaan dan Keamanan",
+                bossIndex: 2,
+                q: "Apakah nama sekolah percuma yang ditubuhkan oleh NGO Cinta Syria Malaysia (CSM) bagi menyediakan pendidikan kepada anak-anak pelarian Syria?",
+                options: [
+                    "Sekolah KITA",
+                    "Sekolah Wawasan",
+                    "Sekolah Harapan",
+                    "Sekolah Amalan"
+                ],
+                correct: 0,
+                explanation: "Cinta Syria Malaysia (CSM) menubuhkan 'Sekolah KITA' bagi memberikan pendidikan percuma kepada anak-anak pelarian Syria."
+            },
+            {
+                id: 18,
+                subtopic: "10.3 Pelibatan Rakyat dalam Isu Kemanusiaan dan Keamanan",
+                bossIndex: 2,
+                q: "Kempen i4Syria yang dilancarkan pada tahun 2011 bagi menyalurkan bantuan pendidikan, kesihatan, dan kebajikan kepada pelarian Syria digerakkan oleh NGO manakah?",
+                options: [
+                    "Humanitarian Care Malaysia (MyCare)",
+                    "Angkatan Belia Islam Malaysia (ABIM)",
+                    "Yayasan Restu",
+                    "MAPIM"
+                ],
+                correct: 0,
+                explanation: "MyCare melancarkan kempen i4Syria bagi menyalurkan pelbagai aspek bantuan kebajikan dan kesihatan kepada pelarian Syria."
+            },
+            {
+                id: 19,
+                subtopic: "10.3 Pelibatan Rakyat dalam Isu Kemanusiaan dan Keamanan",
+                bossIndex: 2,
+                q: "Apakah gabungan NGO tempatan yang turut menganjurkan Hari Solidariti Rakyat Palestin bagi membela nasib rakyat yang tertindas?",
+                options: [
+                    "Majlis Perundingan Pertubuhan Islam Malaysia (MAPIM)",
+                    "MERCY Malaysia",
+                    "Global Peace Mission (GPM)",
+                    "Yayasan Penyelidikan Antartika"
+                ],
+                correct: 0,
+                explanation: "MAPIM aktif menganjurkan Hari Solidariti Rakyat Palestin dan kerja-kerja kesukarelawanan."
+            },
+            {
+                id: 20,
+                subtopic: "10.3 Pelibatan Rakyat dalam Isu Kemanusiaan dan Keamanan",
+                bossIndex: 2,
+                q: "Apakah tindakan rakyat Malaysia bagi menunjukkan sokongan padu kepada perjuangan rakyat Palestin?",
+                options: [
+                    "Mengirim pasukan tentera elit bertempur di sempadan",
+                    "Melakukan demonstrasi aman dan menubuhkan Tabung Palestin",
+                    "Memutus hubungan ekonomi dengan semua negara Barat",
+                    "Memindahkan pelarian Palestin menjadi warganegara tetap Malaysia"
+                ],
+                correct: 1,
+                explanation: "Rakyat Malaysia mengadakan demonstrasi aman dan mengumpul dana sumbangan menerusi Tabung Palestin."
+            },
+
+            // SUBTOPIK 10.4: Usaha Mengekalkan Kelestarian Global
+            {
+                id: 21,
+                subtopic: "10.4 Usaha Mengekalkan Kelestarian Global",
+                bossIndex: 3,
+                q: "Mesyuarat Ketua-Ketua Negara Komanwel (CHOGM) di Malaysia pada Oktober 1989 menghasilkan pengisytiharan alam sekitar. Apakah nama deklarasi tersebut?",
+                options: [
+                    "Deklarasi Kuala Lumpur",
+                    "Deklarasi Langkawi",
+                    "Deklarasi Bangkok",
+                    "Deklarasi Putrajaya"
+                ],
+                correct: 1,
+                explanation: "Deklarasi Langkawi ditandatangani semasa CHOGM 1989 sebagai bukti komitmen memelihara alam sekitar."
+            },
+            {
+                id: 22,
+                subtopic: "10.4 Usaha Mengekalkan Kelestarian Global",
+                bossIndex: 3,
+                q: "Anugerah apakah yang diperkenalkan oleh kerajaan Malaysia pada tahun 1991 bagi mengiktiraf warganegara yang menyumbang dalam pemuliharaan alam sekitar?",
+                options: [
+                    "Anugerah Bumi Hijau",
+                    "Anugerah Langkawi",
+                    "Anugerah Kelestarian Alam",
+                    "Anugerah Geopark Kebangsaan"
+                ],
+                correct: 1,
+                explanation: "Anugerah Langkawi mula diperkenalkan pada 1991 bagi menghargai warganegara yang berbakti kepada alam sekitar."
+            },
+            {
+                id: 23,
+                subtopic: "10.4 Usaha Mengekalkan Kelestarian Global",
+                bossIndex: 3,
+                q: "Apakah matlamat utama pelancaran Dasar Teknologi Hijau Negara oleh kerajaan Malaysia pada tahun 2009?",
+                options: [
+                    "Menggalakkan penggunaan produk teknologi hijau bagi mengawal perubahan iklim",
+                    "Menghentikan kebergantungan kepada tenaga elektrik di kawasan bandar",
+                    "Mengurangkan pengeluaran kenderaan bermotor di seluruh negara",
+                    "Membina kilang pemprosesan sisa pepejal di perairan negara"
+                ],
+                correct: 0,
+                explanation: "Dasar Teknologi Hijau Negara 2009 digubal untuk menggalakkan produk mesra alam bagi mengawal perubahan iklim."
+            },
+            {
+                id: 24,
+                subtopic: "10.4 Usaha Mengekalkan Kelestarian Global",
+                bossIndex: 3,
+                q: "Pada tahun 1983, Malaysia memelopori desakan menerusi Sidang Kemuncak NAM di New Delhi agar PBB mengisytiharkan Benua Antartika sebagai apakah?",
+                options: [
+                    "Kawasan Ujian Saintifik Terbuka",
+                    "Warisan Manusia Sejagat",
+                    "Pangkalan Penyelidikan Bebas Cukai",
+                    "Zarah Alam Asal"
+                ],
+                correct: 1,
+                explanation: "Malaysia mendesak PBB mentadbir Antartika sebagai Warisan Manusia Sejagat agar hasilnya dikongsi secara adil oleh semua negara."
+            },
+            {
+                id: 25,
+                subtopic: "10.4 Usaha Mengekalkan Kelestarian Global",
+                bossIndex: 3,
+                q: "Pusat Penyelidikan Antartika Kebangsaan di Universiti Malaya bagi mengendalikan penyelidikan Antartika diketuai oleh tokoh akademik manakah?",
+                options: [
+                    "Dr. Haji Omar Abdul Rahman",
+                    "Dr. Azizan Abu Samah",
+                    "Prof. Dato' Dr. Mazlin Mokhtar",
+                    "Dr. Mohd Afandi Salleh"
+                ],
+                correct: 1,
+                explanation: "Pusat Penyelidikan Antartika Kebangsaan di Universiti Malaya diterajui oleh Prof. Datuk Dr. Azizan Abu Samah."
+            },
+            {
+                id: 26,
+                subtopic: "10.4 Usaha Mengekalkan Kelestarian Global",
+                bossIndex: 3,
+                q: "Apakah nama yayasan di Kuala Lumpur yang bertanggungjawab menyokong penyelidikan saintifik perubahan iklim dan gas rumah hijau di Antartika?",
+                options: [
+                    "Yayasan Penyelidikan Antartika Sultan Mizan (YPASM)",
+                    "Yayasan Restu Antartika",
+                    "Yayasan Sains Malaysia",
+                    "Yayasan Kelestarian Hijau"
+                ],
+                correct: 0,
+                explanation: "YPASM (Yayasan Penyelidikan Antartika Sultan Mizan) menyokong ekspedisi dan penyelidikan perubahan iklim di Antartika."
+            },
+
+            // SUBTOPIK 10.5: Wawasan Malaysia Menuju Masa Hadapan
+            {
+                id: 27,
+                subtopic: "10.5 Wawasan Malaysia Menuju Masa Hadapan",
+                bossIndex: 4,
+                q: "Pembentukan Komuniti ASEAN yang merangkumi pilar keselamatan, ekonomi, dan sosiobudaya ditubuhkan pada tahun 2015 menerusi sidang kemuncak manakah?",
+                options: [
+                    "Sidang Kemuncak ASEAN ke-27",
+                    "Sidang Kemuncak NAM ke-7",
+                    "Mesyuarat CHOGM 1989",
+                    "Sidang Kemuncak Bumi 1992"
+                ],
+                correct: 0,
+                explanation: "Komuniti ASEAN ditubuhkan secara rasmi pada Sidang Kemuncak ASEAN ke-27 di Kuala Lumpur pada tahun 2015."
+            },
+            {
+                id: 28,
+                subtopic: "10.5 Wawasan Malaysia Menuju Masa Hadapan",
+                bossIndex: 4,
+                q: "Apakah langkah jangka panjang Malaysia dalam menangani isu keselamatan makanan (sekuriti makanan) di peringkat serantau?",
+                options: [
+                    "Menghentikan eksport bahan mentah ke luar negara",
+                    "Mengukuhkan rizab makanan & meningkatkan kerjasama teknologi pertanian ASEAN",
+                    "Menutup sektor perindustrian dan kembali ke sektor pertanian tradisional",
+                    "Mengimport 100% keperluan gandum dari negara Barat"
+                ],
+                correct: 1,
+                explanation: "Malaysia bekerjasama dalam ASEAN (seperti Rizab Sekuriti Makanan ASEAN) bagi menjamin rizab dan keselamatan makanan serantau."
+            },
+            {
+                id: 29,
+                subtopic: "10.5 Wawasan Malaysia Menuju Masa Hadapan",
+                bossIndex: 4,
+                q: "Mengapakah Malaysia berpegang teguh kepada Perjanjian Zon Bebas Senjata Nuklear Asia Tenggara (SEANWFZ) dalam wawasan keselamatan negara?",
+                options: [
+                    "Memastikan rantau Asia Tenggara bebas daripada ancaman & perlumbaan senjata nuklear kuasa besar",
+                    "Mengelakkan perbelanjaan pembinaan kapal perang",
+                    "Membenarkan ujian nuklear dijalankan hanya di laut dalam",
+                    "Memastikan industri elektrik kuasa nuklear berkembang pesat"
+                ],
+                correct: 0,
+                explanation: "SEANWFZ memastikan rantau Asia Tenggara bebas daripada kehadiran, campur tangan, dan ancaman senjata nuklear."
+            },
+            {
+                id: 30,
+                subtopic: "10.5 Wawasan Malaysia Menuju Masa Hadapan",
+                bossIndex: 4,
+                q: "Bagaimanakah sikap dan pandangan Malaysia dalam menangani isu pelarian serta Pendatang Asing Tanpa Izin (PATI) berhadapan cabaran hak asasi manusia?",
+                options: [
+                    "Mengutamakan prinsip kemanusiaan sambil memelihara keselamatan & kedaulatan undang-undang negara",
+                    "Menerima seluruh pelarian tanpa sebarang pendaftaran dokumen",
+                    "Menutup semua sempadan dan mengenakan tindakan ketenteraan keras",
+                    "Membenarkan PATI bekerja tanpa lesen perniagaan yang sah"
+                ],
+                correct: 0,
+                explanation: "Malaysia menyeimbangkan isu pelarian/PATI antara aspek hak kemanusiaan sejagat dengan keselamatan dan kedaulatan undang-undang negara."
+            }
+        ];
+
+        // 5 Unique Bosses representing the 5 Subtopics of Bab 10
+        const BOSSES = [
+            {
+                name: "KAPTEN SINDIKET",
+                title: "Bos 10.1: Ancaman Isu Global",
+                emoji: "🏴‍☠️",
+                color: "#f43f5e",
+                glow: "#fb7185",
+                maxHp: 6
+            },
+            {
+                name: "BARON MONOPOLI",
+                title: "Bos 10.2: Krisis Ekonomi Dunia",
+                emoji: "🤖",
+                color: "#06b6d4",
+                glow: "#22d3ee",
+                maxHp: 6
+            },
+            {
+                name: "JENERAL KONFLIK",
+                title: "Bos 10.3: Cabaran Kemanusiaan",
+                emoji: "👾",
+                color: "#a855f7",
+                glow: "#c084fc",
+                maxHp: 8
+            },
+            {
+                name: "RAKSASA KARBON",
+                title: "Bos 10.4: Pencemar Alam Sekitar",
+                emoji: "🦖",
+                color: "#10b981",
+                glow: "#34d399",
+                maxHp: 6
+            },
+            {
+                name: " ENTITI SIBER NUKLEAR",
+                title: "Bos 10.5: Cabaran Masa Hadapan",
+                emoji: "🛸",
+                color: "#f59e0b",
+                glow: "#fbbf24",
+                maxHp: 4
+            }
+        ];
+
+        /********************************************************************
+         * 2. SYNTHESIZED SOUND ENGINE (Web Audio API - No External Assets)
+         ********************************************************************/
+        class SoundFX {
+            constructor() {
+                this.ctx = null;
+                this.enabled = true;
+            }
+            init() {
+                if (!this.ctx) {
+                    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                    this.ctx = new AudioCtx();
+                }
+                if (this.ctx.state === "suspended") {
+                    this.ctx.resume();
+                }
+            }
+            playTone(freq, type = "sine", duration = 0.15, vol = 0.15, slideTo = null) {
+                if (!this.enabled) return;
+                this.init();
+                try {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = type;
+                    osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+                    if (slideTo) {
+                        osc.frequency.exponentialRampToValueAtTime(slideTo, this.ctx.currentTime + duration);
+                    }
+                    gain.gain.setValueAtTime(vol, this.ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + duration);
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.start();
+                    osc.stop(this.ctx.currentTime + duration);
+                } catch (e) {}
+            }
+            laser() {
+                this.playTone(780, "sawtooth", 0.22, 0.16, 180);
+            }
+            bossHit() {
+                this.playTone(523.25, "triangle", 0.12, 0.2);
+                setTimeout(() => this.playTone(659.25, "triangle", 0.12, 0.2), 90);
+                setTimeout(() => this.playTone(783.99, "triangle", 0.22, 0.22), 180);
+            }
+            playerHurt() {
+                this.playTone(190, "sawtooth", 0.35, 0.22, 75);
+            }
+            tick() {
+                this.playTone(900, "sine", 0.04, 0.05);
+            }
+            bossDefeat() {
+                const notes = [440, 554, 659, 880, 1108];
+                notes.forEach((n, idx) => {
+                    setTimeout(() => this.playTone(n, "square", 0.18, 0.15), idx * 95);
+                });
+            }
+        }
+        const sfx = new SoundFX();
+
+        /********************************************************************
+         * 3. GAME STATE & AR HAND TRACKING VARIABLES
+         ********************************************************************/
+        const videoEl = document.getElementById("webcamVideo");
+        const canvas = document.getElementById("gameCanvas");
+        const ctx = canvas.getContext("2d");
+
+        let gameState = "MENU"; // MENU, CALIBRATION, PLAYING, FEEDBACK, PAUSED, GAMEOVER
+        let isMirror = true;
+        let cameraActive = false;
+        let handLandmarker = null;
+        let lastVideoTime = -1;
+
+        // Smoothed Hand Pointer & Landmarks (LERP stabilization)
+        const handState = {
+            detected: false,
+            rawX: window.innerWidth / 2,
+            rawY: window.innerHeight / 2,
+            x: window.innerWidth / 2,
+            y: window.innerHeight / 2,
+            landmarksMapped: [],
+            fingerCount: 0,
+            stableFingerCount: 0,
+            fingerHoldProgress: 0, // 0 to 1 (1 second hold to trigger answer)
+            isPinching: false,
+            hoveredOrbIndex: -1,
+            dwellProgress: 0, // 0 to 1 (1 second hover to select orb)
+            cooldownUntil: 0 // Timestamp to prevent accidental double selections
+        };
+
+        // Fallback Mouse/Touch Pointer
+        const mouseState = {
+            active: false,
+            x: -100,
+            y: -100,
+            hoveredOrbIndex: -1
+        };
+
+        // Player & Battle Progression State
+        const battle = {
+            questionIndex: 0,
+            endlessCycle: 0,
+            score: 0,
+            lives: 5,
+            maxLives: 5,
+            streak: 0,
+            correctTotal: 0,
+            answeredTotal: 0,
+            bossHp: 6,
+            bossMaxHp: 6,
+            bossShake: 0,
+            bossAttackTimer: 22, // Seconds before boss launches plasma attack
+            bossAttackMax: 22,
+            orbs: [],
+            particles: [],
+            lasers: [],
+            floatingTexts: [],
+            feedbackData: null, // Holds explanation card between questions
+            feedbackTimer: 0
+        };
+
+        const OPTION_COLORS = [
+            { label: "A", finger: 1, bg: "#f43f5e", border: "#fda4af", dark: "#881337" },
+            { label: "B", finger: 2, bg: "#f59e0b", border: "#fde68a", dark: "#78350f" },
+            { label: "C", finger: 3, bg: "#10b981", border: "#6ee7b7", dark: "#064e3b" },
+            { label: "D", finger: 4, bg: "#06b6d4", border: "#67e8f9", dark: "#164e63" }
+        ];
+
+        /********************************************************************
+         * 4. DYNAMIC CANVAS RESIZE & OBJECT-FIT: COVER MAPPING
+         ********************************************************************/
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            layoutAnswerOrbs();
+        }
+        window.addEventListener("resize", resizeCanvas);
+
+        /**
+         * Maps normalized MediaPipe landmark coordinates [0..1] accurately to the
+         * fullscreen <canvas> accounting for video `object-fit: cover` cropping & Mirror Mode.
+         */
+        function mapLandmarkToCanvas(normX, normY) {
+            const cw = canvas.width;
+            const ch = canvas.height;
+            const vw = videoEl.videoWidth || 1280;
+            const vh = videoEl.videoHeight || 720;
+
+            const videoAspect = vw / vh;
+            const canvasAspect = cw / ch;
+
+            let renderW, renderH, offsetX, offsetY;
+            if (canvasAspect > videoAspect) {
+                renderW = cw;
+                renderH = cw / videoAspect;
+                offsetX = 0;
+                offsetY = (ch - renderH) / 2;
+            } else {
+                renderH = ch;
+                renderW = ch * videoAspect;
+                offsetX = (cw - renderW) / 2;
+                offsetY = 0;
+            }
+
+            const finalNormX = isMirror ? (1 - normX) : normX;
+            return {
+                x: finalNormX * renderW + offsetX,
+                y: normY * renderH + offsetY
+            };
+        }
+
+        /********************************************************************
+         * 5. MEDIAPIPE HAND LANDMARKER INITIALIZATION & FINGER COUNT LOGIC
+         ********************************************************************/
+        async function initMediaPipeAndCamera() {
+            const trackingText = document.getElementById("trackingText");
+            const trackingDot = document.getElementById("trackingDot");
+            const calStatus = document.getElementById("calStatusText");
+
+            try {
+                trackingText.textContent = "Membuka Kamera...";
+                if (calStatus) calStatus.textContent = "Meminta kebenaran kamera...";
+
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    video: { width: { ideal: 1280 }, height: { ideal: 720 }, facingMode: "user" },
+                    audio: false
+                });
+                videoEl.srcObject = stream;
+                await videoEl.play();
+
+                videoEl.classList.remove("opacity-0");
+                videoEl.classList.add("opacity-100");
+                document.getElementById("arenaBackdrop").className =
+                    "fixed inset-0 z-0 bg-slate-950/45 pointer-events-none transition-all duration-500";
+
+                trackingText.textContent = "Memuatkan AI Tangan...";
+                if (calStatus) calStatus.textContent = "Memuatkan model pengesanan tangan AI...";
+
+                // Dynamic import supaya permainan tidak terhenti jika CDN lambat/gagal
+                const visionModule = await import("https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.3/vision_bundle.mjs");
+                const FilesetResolver = visionModule.FilesetResolver;
+                const HandLandmarker = visionModule.HandLandmarker;
+
+                const vision = await FilesetResolver.forVisionTasks(
+                    "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.3/wasm"
+                );
+
+                try {
+                    handLandmarker = await HandLandmarker.createFromOptions(vision, {
+                        baseOptions: {
+                            modelAssetPath: "https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task",
+                            delegate: "GPU"
+                        },
+                        runningMode: "VIDEO",
+                        numHands: 1,
+                        minHandDetectionConfidence: 0.5,
+                        minHandPresenceConfidence: 0.5,
+                        minTrackingConfidence: 0.5
+                    });
+                } catch (gpuErr) {
+                    // Fallback ke CPU jika GPU tidak disokong
+                    handLandmarker = await HandLandmarker.createFromOptions(vision, {
+                        baseOptions: {
+                            modelAssetPath: "https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task",
+                            delegate: "CPU"
+                        },
+                        runningMode: "VIDEO",
+                        numHands: 1,
+                        minHandDetectionConfidence: 0.5,
+                        minHandPresenceConfidence: 0.5,
+                        minTrackingConfidence: 0.5
+                    });
+                }
+
+                cameraActive = true;
+                trackingText.textContent = "Kamera & AI Aktif";
+                trackingDot.className = "w-3 h-3 rounded-full bg-emerald-400";
+                if (calStatus) calStatus.textContent = "Kamera Sedia! Cuba angkat 1 - 4 jari anda.";
+                return true;
+            } catch (err) {
+                console.warn("Kamera / MediaPipe gagal dimuatkan, menggunakan mod sokongan:", err);
+                cameraActive = false;
+                trackingText.textContent = "Mod Tetikus / Kekunci";
+                trackingDot.className = "w-3 h-3 rounded-full bg-cyan-400";
+                if (calStatus) {
+                    calStatus.textContent = "Kamera tidak dapat diakses. Sila tekan 'GEMPUR BOS SEKARANG' untuk guna Tetikus/Kekunci!";
+                    calStatus.className = "font-cartoon text-amber-300";
+                }
+                return false;
+            }
+        }
+
+        /**
+         * Counts straight raised fingers (1 to 5) accurately using joint distances to wrist.
+         */
+        function countRaisedFingers(landmarks) {
+            const wrist = landmarks[0];
+            const dist = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
+
+            // Check Index (8 vs 6), Middle (12 vs 10), Ring (16 vs 14), Pinky (20 vs 18)
+            const fingerPairs = [
+                [8, 6],
+                [12, 10],
+                [16, 14],
+                [20, 18]
+            ];
+            let count = 0;
+            for (const [tipIdx, pipIdx] of fingerPairs) {
+                if (dist(landmarks[tipIdx], wrist) > dist(landmarks[pipIdx], wrist) * 1.12) {
+                    count++;
+                }
+            }
+
+            // Thumb check: distance from thumb tip (4) to pinky MCP (17) vs thumb IP (3) to pinky MCP (17)
+            const pinkyMcp = landmarks[17];
+            const indexMcp = landmarks[5];
+            const palmSize = dist(wrist, indexMcp);
+            if (
+                dist(landmarks[4], pinkyMcp) > dist(landmarks[3], pinkyMcp) * 1.12 &&
+                dist(landmarks[4], indexMcp) > palmSize * 0.55
+            ) {
+                count++;
+            }
+
+            return count;
+        }
+
+        function updateHandTracking(dt) {
+            if (!cameraActive || !handLandmarker || videoEl.readyState < 2) {
+                handState.detected = false;
+                return;
+            }
+
+            if (videoEl.currentTime !== lastVideoTime) {
+                lastVideoTime = videoEl.currentTime;
+                const results = handLandmarker.detectForVideo(videoEl, performance.now());
+
+                if (results.landmarks && results.landmarks.length > 0) {
+                    const lm = results.landmarks[0];
+                    handState.detected = true;
+
+                    // Map all 21 landmarks to canvas coordinates
+                    handState.landmarksMapped = lm.map(pt => mapLandmarkToCanvas(pt.x, pt.y));
+
+                    // Index fingertip is landmark 8
+                    const indexTip = handState.landmarksMapped[8];
+                    handState.rawX = indexTip.x;
+                    handState.rawY = indexTip.y;
+
+                    // Pinch check (Thumb tip 4 & Index tip 8)
+                    const thumbTip = handState.landmarksMapped[4];
+                    const pinchPx = Math.hypot(indexTip.x - thumbTip.x, indexTip.y - thumbTip.y);
+                    handState.isPinching = pinchPx < 42;
+
+                    // Count raised fingers (1-5)
+                    handState.fingerCount = countRaisedFingers(lm);
+                } else {
+                    handState.detected = false;
+                    handState.fingerCount = 0;
+                    handState.isPinching = false;
+                }
+            }
+
+            // Smooth LERP for fingertip cursor to eliminate jitter
+            const lerpFactor = Math.min(1, dt * 16);
+            handState.x += (handState.rawX - handState.x) * lerpFactor;
+            handState.y += (handState.rawY - handState.y) * lerpFactor;
+
+            // Update HUD badge
+            const trackingText = document.getElementById("trackingText");
+            const trackingDot = document.getElementById("trackingDot");
+            const fingerPill = document.getElementById("fingerCountPill");
+
+            if (handState.detected) {
+                trackingText.textContent = "Tangan Dikesan";
+                trackingDot.className = "w-3 h-3 rounded-full bg-emerald-400";
+                fingerPill.textContent = `Jari: ${handState.fingerCount}`;
+            } else {
+                trackingText.textContent = "Tiada Tangan";
+                trackingDot.className = "w-3 h-3 rounded-full bg-rose-500 animate-ping";
+                fingerPill.textContent = "Jari: -";
+            }
+
+            // Update Calibration UI if in Calibration Screen
+            if (gameState === "CALIBRATION") {
+                const calStatus = document.getElementById("calStatusText");
+                calStatus.textContent = handState.detected
+                    ? `Dikesan: ${handState.fingerCount} Jari Diangkat!`
+                    : "Sila tunjukkan tangan di hadapan kamera...";
+                for (let i = 1; i <= 4; i++) {
+                    const box = document.getElementById(`calBox${i}`);
+                    if (handState.detected && handState.fingerCount === i) {
+                        box.className = "border-4 border-amber-300 bg-indigo-600/90 rounded-2xl p-3 scale-105 transition-all shadow-lg";
+                    } else {
+                        box.className = "border-3 border-slate-700 bg-slate-800/90 rounded-2xl p-3 transition-all";
+                    }
+                }
+            }
+        }
+
+        /********************************************************************
+         * 6. GAMEPLAY LOGIC: QUESTIONS, BOSSES & ANSWER ORBS
+         ********************************************************************/
+        function getCurrentQuestion() {
+            const idx = battle.questionIndex % QUESTIONS_DB.length;
+            return QUESTIONS_DB[idx];
+        }
+
+        function getCurrentBoss() {
+            const q = getCurrentQuestion();
+            return BOSSES[q.bossIndex];
+        }
+
+        function loadCurrentQuestion() {
+            const q = getCurrentQuestion();
+            const boss = getCurrentBoss();
+
+            // Check if switching to a new boss
+            const prevQ = battle.questionIndex > 0 ? QUESTIONS_DB[(battle.questionIndex - 1) % QUESTIONS_DB.length] : null;
+            if (!prevQ || prevQ.bossIndex !== q.bossIndex) {
+                battle.bossMaxHp = boss.maxHp;
+                battle.bossHp = boss.maxHp;
+            }
+
+            battle.bossAttackMax = Math.max(14, 22 - battle.endlessCycle * 2);
+            battle.bossAttackTimer = battle.bossAttackMax;
+
+            layoutAnswerOrbs();
+        }
+
+        function layoutAnswerOrbs() {
+            const q = getCurrentQuestion();
+            if (!q) return;
+
+            const cw = canvas.width;
+            const ch = canvas.height;
+            const isMobile = cw < 700;
+
+            const cardWidth = isMobile ? Math.min(cw * 0.45, 280) : Math.min(cw * 0.42, 430);
+            const cardHeight = isMobile ? 96 : 104;
+            const gapX = isMobile ? 14 : 28;
+            const gapY = isMobile ? 14 : 20;
+
+            const totalGridW = cardWidth * 2 + gapX;
+            const startX = (cw - totalGridW) / 2;
+            const startY = ch - (cardHeight * 2 + gapY) - (isMobile ? 20 : 32);
+
+            battle.orbs = q.options.map((optText, i) => {
+                const col = i % 2;
+                const row = Math.floor(i / 2);
+                const x = startX + col * (cardWidth + gapX);
+                const y = startY + row * (cardHeight + gapY);
+                return {
+                    index: i,
+                    text: optText,
+                    x,
+                    y,
+                    w: cardWidth,
+                    h: cardHeight,
+                    cx: x + cardWidth / 2,
+                    cy: y + cardHeight / 2,
+                    colorInfo: OPTION_COLORS[i],
+                    pulse: Math.random() * Math.PI * 2
+                };
+            });
+        }
+
+        function triggerAnswerSelection(selectedIndex) {
+            const now = performance.now();
+            if (gameState !== "PLAYING" || now < handState.cooldownUntil) return;
+
+            // Mandatory Cooldown (1.4 seconds)
+            handState.cooldownUntil = now + 1400;
+            handState.fingerHoldProgress = 0;
+            handState.dwellProgress = 0;
+
+            const q = getCurrentQuestion();
+            const boss = getCurrentBoss();
+            const chosenOrb = battle.orbs[selectedIndex];
+            const isCorrect = selectedIndex === q.correct;
+
+            battle.answeredTotal++;
+            const bossCenterX = canvas.width / 2;
+            const bossCenterY = canvas.height * 0.25;
+
+            if (isCorrect) {
+                sfx.laser();
+                setTimeout(() => sfx.bossHit(), 120);
+
+                battle.correctTotal++;
+                battle.streak++;
+                const pointsEarned = 100 + battle.streak * 25;
+                battle.score += pointsEarned;
+                battle.bossHp = Math.max(0, battle.bossHp - 1);
+                battle.bossShake = 18;
+
+                // Fire Laser Beam from Orb to Boss
+                battle.lasers.push({
+                    x1: chosenOrb ? chosenOrb.cx : canvas.width / 2,
+                    y1: chosenOrb ? chosenOrb.cy : canvas.height * 0.8,
+                    x2: bossCenterX,
+                    y2: bossCenterY,
+                    color: "#34d399",
+                    alpha: 1
+                });
+
+                spawnParticles(bossCenterX, bossCenterY, "#fbbf24", 32);
+                spawnFloatingText(`+${pointsEarned} TEPAT!`, bossCenterX, bossCenterY - 40, "#34d399");
+
+                if (battle.bossHp === 0) {
+                    sfx.bossDefeat();
+                    battle.score += 500;
+                    spawnParticles(bossCenterX, bossCenterY, boss.color, 60);
+                    spawnFloatingText(`BOS TEWAS! +500`, bossCenterX, bossCenterY - 80, "#fbbf24");
+                }
+            } else {
+                sfx.playerHurt();
+                battle.streak = 0;
+                battle.lives = Math.max(0, battle.lives - 1);
+                battle.bossShake = -10;
+
+                // Boss shoots red laser at player
+                battle.lasers.push({
+                    x1: bossCenterX,
+                    y1: bossCenterY,
+                    x2: chosenOrb ? chosenOrb.cx : canvas.width / 2,
+                    y2: chosenOrb ? chosenOrb.cy : canvas.height * 0.8,
+                    color: "#f43f5e",
+                    alpha: 1
+                });
+
+                if (chosenOrb) {
+                    spawnParticles(chosenOrb.cx, chosenOrb.cy, "#f43f5e", 25);
+                }
+                spawnFloatingText(`SALAH! -1 NYAWA`, bossCenterX, bossCenterY + 30, "#f43f5e");
+            }
+
+            updateHUD();
+
+            // Show Explanation Overlay for 3.2 seconds before next question
+            battle.feedbackData = {
+                isCorrect,
+                selectedIndex,
+                correctIndex: q.correct,
+                correctOptionText: q.options[q.correct],
+                explanation: q.explanation
+            };
+            battle.feedbackTimer = 3.2;
+            gameState = "FEEDBACK";
+        }
+
+        function advanceToNextQuestion() {
+            battle.feedbackData = null;
+
+            if (battle.lives <= 0) {
+                showGameOver(false);
+                return;
+            }
+
+            battle.questionIndex++;
+            // If completed all 30 questions in first run, show Victory / Endless prompt
+            if (battle.questionIndex === QUESTIONS_DB.length && battle.endlessCycle === 0) {
+                showGameOver(true);
+                return;
+            }
+
+            if (battle.questionIndex % QUESTIONS_DB.length === 0) {
+                battle.endlessCycle++;
+            }
+
+            gameState = "PLAYING";
+            loadCurrentQuestion();
+            handState.cooldownUntil = performance.now() + 700;
+        }
+
+        function updateHUD() {
+            document.getElementById("scoreDisplay").textContent = battle.score;
+
+            // Lives hearts
+            const livesEl = document.getElementById("livesDisplay");
+            let heartsHtml = "";
+            for (let i = 0; i < battle.maxLives; i++) {
+                if (i < battle.lives) {
+                    heartsHtml += `<i class="fa-solid fa-heart text-rose-500 drop-shadow"></i>`;
+                } else {
+                    heartsHtml += `<i class="fa-regular fa-heart text-slate-600"></i>`;
+                }
+            }
+            livesEl.innerHTML = heartsHtml;
+
+            // Combo badge
+            const comboBadge = document.getElementById("comboBadge");
+            if (battle.streak >= 2) {
+                comboBadge.classList.remove("hidden");
+                document.getElementById("comboCount").textContent = battle.streak;
+            } else {
+                comboBadge.classList.add("hidden");
+            }
+        }
+
+        /********************************************************************
+         * 7. VISUAL EFFECTS: PARTICLES & FLOATING TEXT
+         ********************************************************************/
+        function spawnParticles(x, y, color, count = 24) {
+            for (let i = 0; i < count; i++) {
+                const angle = Math.random() * Math.PI * 2;
+                const speed = 90 + Math.random() * 260;
+                battle.particles.push({
+                    x,
+                    y,
+                    vx: Math.cos(angle) * speed,
+                    vy: Math.sin(angle) * speed,
+                    radius: 4 + Math.random() * 7,
+                    color,
+                    alpha: 1,
+                    life: 0.6 + Math.random() * 0.4
+                });
+            }
+        }
+
+        function spawnFloatingText(text, x, y, color) {
+            battle.floatingTexts.push({
+                text,
+                x,
+                y,
+                color,
+                alpha: 1,
+                vy: -55
+            });
+        }
+
+        /********************************************************************
+         * 8. MAIN UPDATE & RENDER LOOP
+         ********************************************************************/
+        let lastFrameTime = performance.now();
+
+        function gameLoop(now) {
+            const dt = Math.min(0.05, (now - lastFrameTime) / 1000);
+            lastFrameTime = now;
+
+            updateHandTracking(dt);
+            updateGameplay(dt, now);
+            renderArena(now);
+
+            requestAnimationFrame(gameLoop);
+        }
+
+        function updateGameplay(dt, now) {
+            // Update particles
+            for (let i = battle.particles.length - 1; i >= 0; i--) {
+                const p = battle.particles[i];
+                p.x += p.vx * dt;
+                p.y += p.vy * dt;
+                p.vy += 320 * dt; // Gravity
+                p.life -= dt;
+                p.alpha = Math.max(0, p.life);
+                if (p.life <= 0) battle.particles.splice(i, 1);
+            }
+
+            // Update lasers
+            for (let i = battle.lasers.length - 1; i >= 0; i--) {
+                battle.lasers[i].alpha -= dt * 2.8;
+                if (battle.lasers[i].alpha <= 0) battle.lasers.splice(i, 1);
+            }
+
+            // Update floating texts
+            for (let i = battle.floatingTexts.length - 1; i >= 0; i--) {
+                const ft = battle.floatingTexts[i];
+                ft.y += ft.vy * dt;
+                ft.alpha -= dt * 0.9;
+                if (ft.alpha <= 0) battle.floatingTexts.splice(i, 1);
+            }
+
+            // Reduce boss shake
+            if (Math.abs(battle.bossShake) > 0.2) {
+                battle.bossShake *= 0.85;
+            } else {
+                battle.bossShake = 0;
+            }
+
+            if (gameState === "FEEDBACK") {
+                battle.feedbackTimer -= dt;
+                if (battle.feedbackTimer <= 0) {
+                    advanceToNextQuestion();
+                }
+                return;
+            }
+
+            if (gameState !== "PLAYING") return;
+
+            // Boss attack countdown timer
+            battle.bossAttackTimer -= dt;
+            if (battle.bossAttackTimer <= 0) {
+                // Time ran out for this question -> Boss attacks player
+                sfx.playerHurt();
+                battle.lives = Math.max(0, battle.lives - 1);
+                battle.streak = 0;
+                updateHUD();
+                const q = getCurrentQuestion();
+                battle.feedbackData = {
+                    isCorrect: false,
+                    selectedIndex: -1,
+                    correctIndex: q.correct,
+                    correctOptionText: q.options[q.correct],
+                    explanation: "Masa Tamat! " + q.explanation
+                };
+                battle.feedbackTimer = 3.2;
+                gameState = "FEEDBACK";
+                return;
+            }
+
+            // Check cooldown
+            const isCoolingDown = now < handState.cooldownUntil;
+
+            // 1. Check Fingertip Pointer Collision (AABB) with Answer Orbs
+            handState.hoveredOrbIndex = -1;
+            mouseState.hoveredOrbIndex = -1;
+
+            for (const orb of battle.orbs) {
+                orb.pulse += dt * 3;
+                if (
+                    handState.detected &&
+                    handState.x >= orb.x &&
+                    handState.x <= orb.x + orb.w &&
+                    handState.y >= orb.y &&
+                    handState.y <= orb.y + orb.h
+                ) {
+                    handState.hoveredOrbIndex = orb.index;
+                }
+                if (
+                    mouseState.active &&
+                    mouseState.x >= orb.x &&
+                    mouseState.x <= orb.x + orb.w &&
+                    mouseState.y >= orb.y &&
+                    mouseState.y <= orb.y + orb.h
+                ) {
+                    mouseState.hoveredOrbIndex = orb.index;
+                }
+            }
+
+            if (isCoolingDown) {
+                handState.dwellProgress = 0;
+                handState.fingerHoldProgress = 0;
+                return;
+            }
+
+            // 2. Selection Method A: Fingertip Dwell (1.0s hover) OR Pinch over an Answer Orb
+            if (handState.hoveredOrbIndex !== -1) {
+                const speedMultiplier = handState.isPinching ? 2.6 : 1.0;
+                handState.dwellProgress += dt * speedMultiplier;
+                if (handState.dwellProgress >= 1.0) {
+                    triggerAnswerSelection(handState.hoveredOrbIndex);
+                    return;
+                }
+            } else {
+                handState.dwellProgress = Math.max(0, handState.dwellProgress - dt * 2);
+            }
+
+            // 3. Selection Method B: Finger Count 1-4 Held Straight for 1.05 seconds
+            if (handState.detected && handState.fingerCount >= 1 && handState.fingerCount <= 4) {
+                if (handState.stableFingerCount === handState.fingerCount) {
+                    handState.fingerHoldProgress += dt / 1.05;
+                    if (handState.fingerHoldProgress >= 1.0) {
+                        triggerAnswerSelection(handState.fingerCount - 1);
+                        return;
+                    }
+                } else {
+                    handState.stableFingerCount = handState.fingerCount;
+                    handState.fingerHoldProgress = 0.1;
+                    sfx.tick();
+                }
+            } else {
+                handState.stableFingerCount = 0;
+                handState.fingerHoldProgress = Math.max(0, handState.fingerHoldProgress - dt * 2.5);
+            }
+        }
+
+        /********************************************************************
+         * 9. CANVAS RENDERING (BOSS, QUESTION BANNER, ORBS, AR HAND)
+         ********************************************************************/
+        function drawRoundedRect(ctx, x, y, w, h, r) {
+            ctx.beginPath();
+            ctx.moveTo(x + r, y);
+            ctx.lineTo(x + w - r, y);
+            ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+            ctx.lineTo(x + w, y + h - r);
+            ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+            ctx.lineTo(x + r, y + h);
+            ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+            ctx.lineTo(x, y + r);
+            ctx.quadraticCurveTo(x, y, x + r, y);
+            ctx.closePath();
+        }
+
+        function wrapTextLines(ctx, text, maxWidth) {
+            const words = text.split(" ");
+            const lines = [];
+            let currentLine = words[0] || "";
+            for (let i = 1; i < words.length; i++) {
+                const testLine = currentLine + " " + words[i];
+                if (ctx.measureText(testLine).width <= maxWidth) {
+                    currentLine = testLine;
+                } else {
+                    lines.push(currentLine);
+                    currentLine = words[i];
+                }
+            }
+            lines.push(currentLine);
+            return lines;
+        }
+
+        function renderArena(now) {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            if (gameState === "PLAYING" || gameState === "FEEDBACK" || gameState === "PAUSED") {
+                renderBossAndQuestion(now);
+                renderAnswerOrbs(now);
+            }
+
+            // Render Laser Beams
+            for (const l of battle.lasers) {
+                ctx.save();
+                ctx.globalAlpha = l.alpha;
+                ctx.strokeStyle = l.color;
+                ctx.lineWidth = 10;
+                ctx.shadowColor = l.color;
+                ctx.shadowBlur = 20;
+                ctx.beginPath();
+                ctx.moveTo(l.x1, l.y1);
+                ctx.lineTo(l.x2, l.y2);
+                ctx.stroke();
+                ctx.restore();
+            }
+
+            // Render Particles
+            for (const p of battle.particles) {
+                ctx.save();
+                ctx.globalAlpha = p.alpha;
+                ctx.fillStyle = p.color;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            }
+
+            // Render Floating Texts
+            for (const ft of battle.floatingTexts) {
+                ctx.save();
+                ctx.globalAlpha = ft.alpha;
+                ctx.font = "900 26px 'Fredoka', sans-serif";
+                ctx.textAlign = "center";
+                ctx.strokeStyle = "#0f172a";
+                ctx.lineWidth = 5;
+                ctx.strokeText(ft.text, ft.x, ft.y);
+                ctx.fillStyle = ft.color;
+                ctx.fillText(ft.text, ft.x, ft.y);
+                ctx.restore();
+            }
+
+            // Render Feedback Overlay Card if in FEEDBACK state
+            if (gameState === "FEEDBACK" && battle.feedbackData) {
+                renderFeedbackOverlay();
+            }
+
+            // Always Render AR Hand Skeleton & Fingertip Cursor on top
+            renderHandAR(now);
+            renderMouseCursor();
+        }
+
+        function renderMouseCursor() {
+            if (!mouseState.active || handState.detected) return;
+            ctx.save();
+            ctx.beginPath();
+            ctx.arc(mouseState.x, mouseState.y, 12, 0, Math.PI * 2);
+            ctx.strokeStyle = "#38bdf8";
+            ctx.lineWidth = 3;
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.arc(mouseState.x, mouseState.y, 4, 0, Math.PI * 2);
+            ctx.fillStyle = "#fde047";
+            ctx.fill();
+            ctx.restore();
+        }
+
+        function renderBossAndQuestion(now) {
+            const cw = canvas.width;
+            const ch = canvas.height;
+            const isMobile = cw < 700;
+            const q = getCurrentQuestion();
+            const boss = getCurrentBoss();
+
+            // 1. Boss Avatar & Health Bar (Top-Center Arena)
+            const bossX = cw / 2 + battle.bossShake;
+            const bossY = isMobile ? 105 : 118;
+            const floatOffset = Math.sin(now * 0.004) * 7;
+
+            ctx.save();
+            // Glowing aura behind boss
+            const grad = ctx.createRadialGradient(bossX, bossY + floatOffset, 10, bossX, bossY + floatOffset, isMobile ? 48 : 64);
+            grad.addColorStop(0, boss.glow);
+            grad.addColorStop(1, "rgba(0,0,0,0)");
+            ctx.fillStyle = grad;
+            ctx.beginPath();
+            ctx.arc(bossX, bossY + floatOffset, isMobile ? 48 : 64, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Boss Emoji
+            ctx.font = `${isMobile ? 46 : 62}px sans-serif`;
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            ctx.fillText(boss.emoji, bossX, bossY + floatOffset);
+
+            // Boss Name & HP Bar
+            const hpBarW = isMobile ? 210 : 280;
+            const hpBarH = 16;
+            const hpX = cw / 2 - hpBarW / 2;
+            const hpY = bossY + (isMobile ? 34 : 44);
+
+            ctx.font = `700 ${isMobile ? 12 : 14}px 'Fredoka', sans-serif`;
+            ctx.fillStyle = "#fde68a";
+            ctx.strokeStyle = "#0f172a";
+            ctx.lineWidth = 3;
+            const bossTitleText = `${boss.name} (${q.subtopic})`;
+            ctx.strokeText(bossTitleText, cw / 2, hpY - 8);
+            ctx.fillText(bossTitleText, cw / 2, hpY - 8);
+
+            // HP Background
+            drawRoundedRect(ctx, hpX, hpY, hpBarW, hpBarH, 8);
+            ctx.fillStyle = "#1e293b";
+            ctx.fill();
+            ctx.lineWidth = 2.5;
+            ctx.strokeStyle = "#0f172a";
+            ctx.stroke();
+
+            // HP Fill
+            const hpRatio = Math.max(0, battle.bossHp / battle.bossMaxHp);
+            if (hpRatio > 0) {
+                drawRoundedRect(ctx, hpX + 2, hpY + 2, (hpBarW - 4) * hpRatio, hpBarH - 4, 6);
+                ctx.fillStyle = boss.color;
+                ctx.fill();
+            }
+
+            // 2. Question Card Banner below Boss
+            const qBoxW = Math.min(cw * 0.92, 860);
+            const qBoxX = (cw - qBoxW) / 2;
+            const qBoxY = hpY + 26;
+
+            ctx.font = `800 ${isMobile ? 15 : 19}px 'Nunito', sans-serif`;
+            const lines = wrapTextLines(ctx, `S${q.id}: ${q.q}`, qBoxW - 36);
+            const lineHeight = isMobile ? 21 : 26;
+            const qBoxH = lines.length * lineHeight + 34;
+
+            // 3D Shadow & Box
+            drawRoundedRect(ctx, qBoxX, qBoxY + 5, qBoxW, qBoxH, 18);
+            ctx.fillStyle = "#0f172a";
+            ctx.fill();
+
+            drawRoundedRect(ctx, qBoxX, qBoxY, qBoxW, qBoxH, 18);
+            ctx.fillStyle = "rgba(15, 23, 42, 0.92)";
+            ctx.fill();
+            ctx.lineWidth = 3.5;
+            ctx.strokeStyle = boss.color;
+            ctx.stroke();
+
+            // Timer Progress Bar inside Bottom of Question Card
+            const timerRatio = Math.max(0, battle.bossAttackTimer / battle.bossAttackMax);
+            drawRoundedRect(ctx, qBoxX + 12, qBoxY + qBoxH - 10, (qBoxW - 24) * timerRatio, 5, 3);
+            ctx.fillStyle = timerRatio > 0.35 ? "#38bdf8" : "#f43f5e";
+            ctx.fill();
+
+            // Render Question Text Lines
+            ctx.fillStyle = "#ffffff";
+            ctx.textAlign = "center";
+            ctx.textBaseline = "top";
+            lines.forEach((line, i) => {
+                ctx.fillText(line, cw / 2, qBoxY + 12 + i * lineHeight);
+            });
+            ctx.restore();
+        }
+
+        function renderAnswerOrbs(now) {
+            const isMobile = canvas.width < 700;
+
+            for (const orb of battle.orbs) {
+                const isFingerMatched = handState.detected && handState.fingerCount === orb.colorInfo.finger;
+                const isHovered = handState.hoveredOrbIndex === orb.index || mouseState.hoveredOrbIndex === orb.index;
+                const activeHighlight = isFingerMatched || isHovered;
+
+                const floatY = Math.sin(orb.pulse) * 3;
+                const drawY = orb.y + floatY;
+
+                ctx.save();
+
+                // 3D Bottom Shadow
+                drawRoundedRect(ctx, orb.x, drawY + 6, orb.w, orb.h, 18);
+                ctx.fillStyle = "#0f172a";
+                ctx.fill();
+
+                // Main Card Body
+                drawRoundedRect(ctx, orb.x, drawY, orb.w, orb.h, 18);
+                ctx.fillStyle = activeHighlight ? orb.colorInfo.dark : "rgba(15, 23, 42, 0.92)";
+                ctx.fill();
+                ctx.lineWidth = activeHighlight ? 4.5 : 3;
+                ctx.strokeStyle = activeHighlight ? "#fde047" : orb.colorInfo.bg;
+                ctx.stroke();
+
+                // Progress Fill Bar when holding fingers or dwelling with fingertip
+                let progress = 0;
+                if (handState.hoveredOrbIndex === orb.index) {
+                    progress = handState.dwellProgress;
+                } else if (isFingerMatched) {
+                    progress = handState.fingerHoldProgress;
+                }
+                if (progress > 0.02) {
+                    ctx.save();
+                    drawRoundedRect(ctx, orb.x + 3, drawY + 3, (orb.w - 6) * Math.min(1, progress), orb.h - 6, 15);
+                    ctx.fillStyle = orb.colorInfo.bg + "66";
+                    ctx.fill();
+                    ctx.restore();
+                }
+
+                // Left Badge: Finger Count & Letter (e.g., "1☝️ A")
+                const badgeW = isMobile ? 54 : 68;
+                drawRoundedRect(ctx, orb.x + 8, drawY + 8, badgeW, orb.h - 16, 12);
+                ctx.fillStyle = orb.colorInfo.bg;
+                ctx.fill();
+
+                ctx.fillStyle = "#0f172a";
+                ctx.font = `900 ${isMobile ? 18 : 22}px 'Fredoka', sans-serif`;
+                ctx.textAlign = "center";
+                ctx.textBaseline = "middle";
+                ctx.fillText(`${orb.colorInfo.label}`, orb.x + 8 + badgeW / 2, drawY + orb.h / 2 - 10);
+
+                ctx.font = `800 ${isMobile ? 11 : 12}px 'Nunito', sans-serif`;
+                ctx.fillText(`✋ ${orb.colorInfo.finger} Jari`, orb.x + 8 + badgeW / 2, drawY + orb.h / 2 + 12);
+
+                // Option Text (Right side of badge)
+                const textX = orb.x + badgeW + 18;
+                const maxTextW = orb.w - badgeW - 28;
+                ctx.fillStyle = "#f8fafc";
+                ctx.font = `700 ${isMobile ? 13 : 15}px 'Nunito', sans-serif`;
+                ctx.textAlign = "left";
+                const optLines = wrapTextLines(ctx, orb.text, maxTextW);
+                const lineH = isMobile ? 16 : 19;
+                const totalTextH = optLines.length * lineH;
+                let startTextY = drawY + (orb.h - totalTextH) / 2 + lineH / 2;
+
+                optLines.forEach((line, idx) => {
+                    ctx.fillText(line, textX, startTextY + idx * lineH);
+                });
+
+                ctx.restore();
+            }
+        }
+
+        function renderFeedbackOverlay() {
+            const fb = battle.feedbackData;
+            const cw = canvas.width;
+            const ch = canvas.height;
+            const isMobile = cw < 700;
+
+            const boxW = Math.min(cw * 0.92, 680);
+            const boxH = isMobile ? 210 : 195;
+            const boxX = (cw - boxW) / 2;
+            const boxY = (ch - boxH) / 2;
+
+            ctx.save();
+            // Backdrop dim
+            ctx.fillStyle = "rgba(2, 6, 23, 0.65)";
+            ctx.fillRect(0, 0, cw, ch);
+
+            // 3D Card
+            drawRoundedRect(ctx, boxX, boxY + 8, boxW, boxH, 24);
+            ctx.fillStyle = "#0f172a";
+            ctx.fill();
+
+            drawRoundedRect(ctx, boxX, boxY, boxW, boxH, 24);
+            ctx.fillStyle = "#1e293b";
+            ctx.fill();
+            ctx.lineWidth = 4;
+            ctx.strokeStyle = fb.isCorrect ? "#34d399" : "#f43f5e";
+            ctx.stroke();
+
+            // Header Status
+            ctx.font = `700 ${isMobile ? 20 : 24}px 'Fredoka', sans-serif`;
+            ctx.textAlign = "center";
+            ctx.fillStyle = fb.isCorrect ? "#34d399" : "#fb7185";
+            const headerTitle = fb.isCorrect ? "✅ JAWAPAN TEPAT! SYABAS!" : "❌ KURANG TEPAT!";
+            ctx.fillText(headerTitle, cw / 2, boxY + 34);
+
+            // Correct Answer Label
+            ctx.font = `800 ${isMobile ? 13 : 15}px 'Nunito', sans-serif`;
+            ctx.fillStyle = "#fde047";
+            const ansLine = `Jawapan Sebenar: [${OPTION_COLORS[fb.correctIndex].label}] ${fb.correctOptionText}`;
+            const ansWrapped = wrapTextLines(ctx, ansLine, boxW - 40);
+            ansWrapped.forEach((l, i) => {
+                ctx.fillText(l, cw / 2, boxY + 62 + i * 18);
+            });
+
+            // Explanation Text
+            ctx.font = `600 ${isMobile ? 12.5 : 14.5}px 'Nunito', sans-serif`;
+            ctx.fillStyle = "#e2e8f0";
+            const expLines = wrapTextLines(ctx, "💡 Huraian: " + fb.explanation, boxW - 44);
+            expLines.forEach((l, i) => {
+                ctx.fillText(l, cw / 2, boxY + 106 + i * 19);
+            });
+
+            // Hint to click/continue
+            ctx.font = `700 ${isMobile ? 11 : 12}px 'Nunito', sans-serif`;
+            ctx.fillStyle = "#94a3b8";
+            ctx.fillText("(Klik skrin atau tekan Space/Enter untuk teruskan segera)", cw / 2, boxY + boxH - 16);
+
+            ctx.restore();
+        }
+
+        function renderHandAR(now) {
+            if (!handState.detected || handState.landmarksMapped.length === 0) return;
+
+            const lm = handState.landmarksMapped;
+            const connections = [
+                [0,1],[1,2],[2,3],[3,4],       // Thumb
+                [0,5],[5,6],[6,7],[7,8],       // Index
+                [5,9],[9,10],[10,11],[11,12],  // Middle
+                [9,13],[13,14],[14,15],[15,16],// Ring
+                [13,17],[0,17],[17,18],[18,19],[19,20] // Pinky & Palm
+            ];
+
+            ctx.save();
+            // Subtle AR Hand Skeleton Lines
+            ctx.strokeStyle = "rgba(56, 189, 248, 0.55)";
+            ctx.lineWidth = 2.5;
+            for (const [a, b] of connections) {
+                ctx.beginPath();
+                ctx.moveTo(lm[a].x, lm[a].y);
+                ctx.lineTo(lm[b].x, lm[b].y);
+                ctx.stroke();
+            }
+
+            // Landmark Joint Dots
+            for (let i = 0; i < lm.length; i++) {
+                ctx.beginPath();
+                ctx.arc(lm[i].x, lm[i].y, i === 8 ? 7 : 3.5, 0, Math.PI * 2);
+                ctx.fillStyle = [4, 8, 12, 16, 20].includes(i) ? "#fde047" : "#38bdf8";
+                ctx.fill();
+            }
+
+            // Prominent Index Fingertip Reticle / Pointer
+            const px = handState.x;
+            const py = handState.y;
+            const isCooling = now < handState.cooldownUntil;
+
+            ctx.beginPath();
+            ctx.arc(px, py, 20, 0, Math.PI * 2);
+            ctx.strokeStyle = isCooling ? "#94a3b8" : (handState.isPinching ? "#f43f5e" : "#fde047");
+            ctx.lineWidth = 3.5;
+            ctx.stroke();
+
+            // Dwell / Finger Hold Circular Progress Ring around Cursor
+            const activeProgress = Math.max(handState.dwellProgress, handState.fingerHoldProgress);
+            if (activeProgress > 0.05 && !isCooling) {
+                ctx.beginPath();
+                ctx.arc(px, py, 26, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * Math.min(1, activeProgress));
+                ctx.strokeStyle = "#34d399";
+                ctx.lineWidth = 5;
+                ctx.stroke();
+            }
+
+            // Finger Count Badge Floating Next to Cursor
+            if (handState.fingerCount >= 1 && handState.fingerCount <= 5) {
+                ctx.font = "900 15px 'Fredoka', sans-serif";
+                ctx.fillStyle = "#0f172a";
+                ctx.strokeStyle = "#fde047";
+                ctx.lineWidth = 3;
+                const badgeText = `${handState.fingerCount} Jari`;
+                ctx.strokeText(badgeText, px + 34, py - 14);
+                ctx.fillText(badgeText, px + 34, py - 14);
+            }
+
+            ctx.restore();
+        }
+
+        /********************************************************************
+         * 10. EVENT LISTENERS: UI FLOW, MOUSE & KEYBOARD FALLBACKS
+         ********************************************************************/
+        function startNewBattle(resetAll = true) {
+            if (resetAll) {
+                battle.questionIndex = 0;
+                battle.endlessCycle = 0;
+                battle.score = 0;
+                battle.lives = 5;
+                battle.streak = 0;
+                battle.correctTotal = 0;
+                battle.answeredTotal = 0;
+            }
+            updateHUD();
+            loadCurrentQuestion();
+            handState.cooldownUntil = performance.now() + 900;
+            gameState = "PLAYING";
+        }
+
+        function showGameOver(isVictory) {
+            gameState = "GAMEOVER";
+            document.getElementById("gameOverScreen").classList.remove("hidden");
+
+            document.getElementById("endEmoji").textContent = isVictory ? "🏆" : "🛡️";
+            document.getElementById("endTitle").textContent = isVictory
+                ? "KECEMERLANGAN MALAYSIA TERBUKTI!"
+                : "PERTAHANAN TERTEWAS!";
+            document.getElementById("endSubtitle").textContent = isVictory
+                ? "Syabas! Anda berjaya menjawab kesemua 30 soalan KSSM Sejarah Bab 10!"
+                : "Jangan putus asa! Ulang kaji huraian dan gempur semula bos Sejarah.";
+
+            document.getElementById("finalScore").textContent = battle.score;
+            const acc = battle.answeredTotal > 0 ? Math.round((battle.correctTotal / battle.answeredTotal) * 100) : 0;
+            document.getElementById("finalAccuracy").textContent = `${acc}%`;
+            const bossesCleared = Math.min(5, Math.floor(battle.questionIndex / 6));
+            document.getElementById("finalBosses").textContent = `${bossesCleared} / 5`;
+        }
+
+        // Start Buttons
+        document.getElementById("btnStartWithCamera").addEventListener("click", () => {
+            sfx.init();
+            sfx.bossHit();
+            document.getElementById("menuScreen").classList.add("hidden");
+            document.getElementById("hudBar").classList.remove("hidden");
+            document.getElementById("calibrationScreen").classList.remove("hidden");
+            gameState = "CALIBRATION";
+            initMediaPipeAndCamera();
+        });
+
+        document.getElementById("btnStartWithoutCamera").addEventListener("click", () => {
+            sfx.init();
+            sfx.bossHit();
+            cameraActive = false;
+            document.getElementById("trackingText").textContent = "Mod Tetikus / Kekunci";
+            document.getElementById("trackingDot").className = "w-3 h-3 rounded-full bg-cyan-400";
+            document.getElementById("menuScreen").classList.add("hidden");
+            document.getElementById("hudBar").classList.remove("hidden");
+            startNewBattle(true);
+        });
+
+        document.getElementById("btnLaunchBattle").addEventListener("click", () => {
+            sfx.bossHit();
+            document.getElementById("calibrationScreen").classList.add("hidden");
+            startNewBattle(true);
+        });
+
+        // HUD Controls
+        document.getElementById("btnToggleMirror").addEventListener("click", () => {
+            isMirror = !isMirror;
+            videoEl.classList.toggle("mirror-video", isMirror);
+            sfx.tick();
+        });
+
+        document.getElementById("btnToggleAudio").addEventListener("click", () => {
+            sfx.enabled = !sfx.enabled;
+            const icon = document.getElementById("audioIcon");
+            icon.className = sfx.enabled ? "fa-solid fa-volume-high" : "fa-solid fa-volume-xmark";
+        });
+
+        document.getElementById("btnPauseGame").addEventListener("click", () => {
+            if (gameState === "PLAYING") {
+                gameState = "PAUSED";
+                document.getElementById("pauseScreen").classList.remove("hidden");
+            }
+        });
+
+        document.getElementById("btnResumeGame").addEventListener("click", () => {
+            document.getElementById("pauseScreen").classList.add("hidden");
+            gameState = "PLAYING";
+        });
+
+        document.getElementById("btnRestartFromPause").addEventListener("click", () => {
+            document.getElementById("pauseScreen").classList.add("hidden");
+            startNewBattle(true);
+        });
+
+        document.getElementById("btnBackToMenu").addEventListener("click", () => {
+            document.getElementById("pauseScreen").classList.add("hidden");
+            document.getElementById("hudBar").classList.add("hidden");
+            document.getElementById("menuScreen").classList.remove("hidden");
+            gameState = "MENU";
+        });
+
+        document.getElementById("btnPlayAgain").addEventListener("click", () => {
+            document.getElementById("gameOverScreen").classList.add("hidden");
+            startNewBattle(true);
+        });
+
+        document.getElementById("btnContinueEndless").addEventListener("click", () => {
+            document.getElementById("gameOverScreen").classList.add("hidden");
+            if (battle.lives <= 0) battle.lives = 3;
+            battle.endlessCycle++;
+            updateHUD();
+            loadCurrentQuestion();
+            gameState = "PLAYING";
+        });
+
+        // Mouse & Touch Fallback Interactions on Canvas
+        canvas.addEventListener("mousemove", (e) => {
+            const rect = canvas.getBoundingClientRect();
+            mouseState.active = true;
+            mouseState.x = e.clientX - rect.left;
+            mouseState.y = e.clientY - rect.top;
+        });
+
+        function handleCanvasPointerDown(clientX, clientY) {
+            const rect = canvas.getBoundingClientRect();
+            const mx = clientX - rect.left;
+            const my = clientY - rect.top;
+
+            if (gameState === "FEEDBACK") {
+                advanceToNextQuestion();
+                return;
+            }
+            if (gameState !== "PLAYING") return;
+
+            // Semak sama ada pemain menekan pada mana-mana Perisai Jawapan (Orb)
+            for (const orb of battle.orbs) {
+                if (mx >= orb.x && mx <= orb.x + orb.w && my >= orb.y && my <= orb.y + orb.h) {
+                    // Langkau cooldown tangan apabila klik secara terus dengan tetikus/sentuhan skrin
+                    handState.cooldownUntil = 0;
+                    triggerAnswerSelection(orb.index);
+                    break;
+                }
+            }
+        }
+
+        canvas.addEventListener("click", (e) => {
+            handleCanvasPointerDown(e.clientX, e.clientY);
+        });
+
+        canvas.addEventListener("touchstart", (e) => {
+            if (e.touches && e.touches.length > 0) {
+                mouseState.active = true;
+                mouseState.x = e.touches[0].clientX;
+                mouseState.y = e.touches[0].clientY;
+                handleCanvasPointerDown(e.touches[0].clientX, e.touches[0].clientY);
+            }
+        }, { passive: true });
+
+        // Keyboard Fallback (1, 2, 3, 4 or A, B, C, D)
+        window.addEventListener("keydown", (e) => {
+            if (gameState === "FEEDBACK" && (e.key === " " || e.key === "Enter")) {
+                advanceToNextQuestion();
+                return;
+            }
+            if (gameState !== "PLAYING") return;
+            const key = e.key.toUpperCase();
+            if (["1", "2", "3", "4", "A", "B", "C", "D"].includes(key)) {
+                handState.cooldownUntil = 0;
+                if (key === "1" || key === "A") triggerAnswerSelection(0);
+                if (key === "2" || key === "B") triggerAnswerSelection(1);
+                if (key === "3" || key === "C") triggerAnswerSelection(2);
+                if (key === "4" || key === "D") triggerAnswerSelection(3);
+            }
+        });
+
+        // Initialize Canvas & Start Main Loop Immediately
+        resizeCanvas();
+        requestAnimationFrame(gameLoop);
+    </script>
+</body>
+</html>
